@@ -19,8 +19,55 @@ screen = pygame.display.set_mode((width, height))
 
 cards_sprites = sprites()
 
-back_card_image = pygame.transform.scale(cards_sprites["back"], (120, 200))
-back_card_image = pygame.transform.scale(back_card_image, (card_width, card_height))
+back_card_image = pygame.transform.scale(cards_sprites["back"], (card_width, card_height))
+
+def player_hands(game, n):
+    global current_rects
+    current_rects = {}
+    counter = 0
+
+    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width)) / 2
+    for card in game.player_hands[f"player{n.p}"]:
+        card_image = pygame.transform.scale(cards_sprites[card], (card_width * 1.5, card_height * 1.5))
+        rect = card_image.get_rect(topleft=(start_x + counter * (card_width), 600))
+        screen.blit(card_image, rect.topleft)
+
+        current_rects[counter] = rect
+        counter += 1
+
+"""    draw_p = (n.p + 1) % 5
+    if draw_p == 0:
+        draw_p = 1
+    start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
+    counter = 0
+    for card in game.player_hands[f"player{draw_p}"]:
+        rotated_image = pygame.transform.rotate(cards_sprites["back"], 90)
+        rect = rotated_image.get_rect(topleft=(card_width * 2, start_y + (card_width + 10) * counter))
+        screen.blit(rotated_image, rect.topleft)
+        counter += 1
+
+    draw_p = (draw_p + 1) % 5
+    if draw_p == 0:
+        draw_p = 1
+    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width + (len(game.player_hands[f"player{n.p}"]) - 1) * 10)) / 2
+    counter = 0
+    for card in game.player_hands[f"player{draw_p}"]:
+        rotated_image = pygame.transform.rotate(cards_sprites["back"], 180)
+        rect = rotated_image.get_rect(topleft=(start_x + counter * (card_width + 10), 100))
+        screen.blit(rotated_image, rect.topleft)
+        counter += 1
+    
+    draw_p = (draw_p + 1) % 5
+    if draw_p == 0:
+        draw_p = 1
+    start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
+    counter = 0
+    for card in game.player_hands[f"player{draw_p}"]:
+        rotated_image = pygame.transform.rotate(cards_sprites["back"], 270)
+        rect = rotated_image.get_rect(topleft=(width - card_width * 2 - card_height, start_y + (card_width + 10) * counter))
+        screen.blit(rotated_image, rect.topleft)
+        counter += 1"""
+
 
 def redraw(n, game):
     
@@ -32,49 +79,9 @@ def redraw(n, game):
         screen.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
 
     else:
-        global current_rects, draw_rect
-        current_rects = {}
-        counter = 0
+        global draw_rect
 
-        start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width + (len(game.player_hands[f"player{n.p}"]) - 1) * 10)) / 2
-        for card in game.player_hands[f"player{n.p}"]:
-            rect = cards_sprites[card].get_rect(topleft=(start_x + counter * (card_width + 10), 700))
-            current_rects[counter] = rect
-            screen.blit(cards_sprites[card], rect.topleft)
-            counter += 1
-
-        draw_p = (n.p + 1) % 5
-        if draw_p == 0:
-            draw_p = 1
-        start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
-        counter = 0
-        for card in game.player_hands[f"player{draw_p}"]:
-            rotated_image = pygame.transform.rotate(cards_sprites["back"], 90)
-            rect = rotated_image.get_rect(topleft=(card_width * 2, start_y + (card_width + 10) * counter))
-            screen.blit(rotated_image, rect.topleft)
-            counter += 1
-
-        draw_p = (draw_p + 1) % 5
-        if draw_p == 0:
-            draw_p = 1
-        start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width + (len(game.player_hands[f"player{n.p}"]) - 1) * 10)) / 2
-        counter = 0
-        for card in game.player_hands[f"player{draw_p}"]:
-            rotated_image = pygame.transform.rotate(cards_sprites["back"], 180)
-            rect = rotated_image.get_rect(topleft=(start_x + counter * (card_width + 10), 100))
-            screen.blit(rotated_image, rect.topleft)
-            counter += 1
-        
-        draw_p = (draw_p + 1) % 5
-        if draw_p == 0:
-            draw_p = 1
-        start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
-        counter = 0
-        for card in game.player_hands[f"player{draw_p}"]:
-            rotated_image = pygame.transform.rotate(cards_sprites["back"], 270)
-            rect = rotated_image.get_rect(topleft=(width - card_width * 2 - card_height, start_y + (card_width + 10) * counter))
-            screen.blit(rotated_image, rect.topleft)
-            counter += 1
+        player_hands(game, n)
 
         for x in game.played_cards:
             card_image = pygame.transform.rotate(cards_sprites[x[0]], x[1])
@@ -82,7 +89,7 @@ def redraw(n, game):
             screen.blit(card_image, rotated_rect.topleft)
 
         for i in range(len(game.current_deck) if len(game.current_deck) <= 5 else 5):  
-            offset = i * 4 
+            offset = i * 2 
             screen.blit(back_card_image, ((width - card_width) / 2 * 1.5 - offset, 400 - offset)) 
 
         draw_rect = cards_sprites["back"].get_rect(topleft=((width - card_width) / 2 * 1.5 - offset, 400 - offset))

@@ -38,6 +38,8 @@ class Game:
     def play(self, card):
         self.current_card = card
         self.played_cards.append([card, random.randint(-90, 90)])
+        if len(self.played_cards) > 10:
+            del self.played_cards[0]
 
         del self.player_hands[f"player{self.current_player}"][self.player_hands[f"player{self.current_player}"].index(card)]
         
