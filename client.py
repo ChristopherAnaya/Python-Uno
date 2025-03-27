@@ -26,9 +26,9 @@ def player_hands(game, n):
     current_rects = {}
     counter = 0
 
-    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width)) / 2
-
     num = len(game.player_hands[f"player{n.p}"])
+
+    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * (card_width - ((num//2 - (1 if num//2 != 0 else 0))) * 5))) / 2
 
     if num % 2 == 0:
         rotations =  [i for i in range(-num//2, 0)] + [i for i in range(1, num//2 + 1)]
@@ -38,9 +38,9 @@ def player_hands(game, n):
     print(rotations)
     
     for card in game.player_hands[f"player{n.p}"]:
-        card_image = pygame.transform.scale(cards_sprites[card], (card_width * 1.5, card_height * 1.5))
+        card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
         card_image = pygame.transform.rotate(card_image, rotations[counter])
-        rect = card_image.get_rect(topleft=(start_x + counter * (card_width), 600 + abs(rotations[counter])**1.4))
+        rect = card_image.get_rect(topleft=(start_x + counter * (card_width - ((num//2 - (1 if num//2 != 0 else 0))) * 5), 600 + abs(rotations[counter])))
         screen.blit(card_image, rect.topleft)
 
         current_rects[counter] = rect
