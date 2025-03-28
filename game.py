@@ -19,7 +19,7 @@ class Game:
         self.current_card = self.current_deck[card]
 
         self.played_cards = []
-        self.played_cards.append([self.current_deck[card], 0])
+        self.played_cards.append([self.current_deck[card], 0, 0, 0])
 
         self.valid_cards = list(filter(lambda x: x.split("_")[0] == self.current_card.split("_")[0] or x.split("_")[1] == self.current_card.split("_")[1], self.base_deck)) + ['wild_change', 'wild_plus4']
        
@@ -37,7 +37,7 @@ class Game:
  
     def play(self, card):
         self.current_card = card
-        self.played_cards.append([card, random.randint(-90, 90)])
+        self.played_cards.append([card, random.randint(-90, 90), random.randint(-10, 10), random.randint(-10, 10)])
         if len(self.played_cards) > 10:
             del self.played_cards[0]
 

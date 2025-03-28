@@ -21,29 +21,35 @@ cards_sprites = sprites()
 
 back_card_image = pygame.transform.scale(cards_sprites["back"], (card_width, card_height))
 
+current_hovering = None
+
 def player_hands(game, n):
     global current_rects
-    current_rects = {}
-    counter = 0
+    current_rects = []
 
+    counter = 0
     num = len(game.player_hands[f"player{n.p}"])
 
-    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * (card_width - ((num//2 - (1 if num//2 != 0 else 0))) * 5))) / 2
+    start_x = (width - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
 
     if num % 2 == 0:
-        rotations =  [i for i in range(-num//2, 0)] + [i for i in range(1, num//2 + 1)]
-        rotations = rotations[::-1]
+        rotations = ([i for i in range(-num // 2, 0)] + [i for i in range(1, num // 2 + 1)])[::-1]
     else:
-        rotations = [i for i in range(-num//2 + 1, num//2 + 1)][::-1]
-    print(rotations)
-    
-    for card in game.player_hands[f"player{n.p}"]:
-        card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
-        card_image = pygame.transform.rotate(card_image, rotations[counter])
-        rect = card_image.get_rect(topleft=(start_x + counter * (card_width - ((num//2 - (1 if num//2 != 0 else 0))) * 5), 600 + abs(rotations[counter])))
-        screen.blit(card_image, rect.topleft)
+        rotations = [i for i in range(-num // 2 + 1, num // 2 + 1)][::-1]
 
-        current_rects[counter] = rect
+    for i, card in enumerate(game.player_hands[f"player{n.p}"]):
+        
+        card_image = pygame.transform.scale(cards_sprites[card], (card_width * 1.5, card_height * 1.5))
+        rotated_image = pygame.transform.rotate(card_image, rotations[counter])
+        
+        
+        rect = rotated_image.get_rect(topleft=(start_x + counter * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5), 
+                                               600 + abs(rotations[counter])))
+        screen.blit(rotated_image, rect.topleft)
+
+        
+        mask = pygame.mask.from_surface(rotated_image)
+        current_rects.append((i, rect, mask))
         counter += 1
 
 """    draw_p = (n.p + 1) % 5
@@ -96,7 +102,7 @@ def redraw(n, game):
 
         for x in game.played_cards:
             card_image = pygame.transform.rotate(cards_sprites[x[0]], x[1])
-            rotated_rect = card_image.get_rect(center=((width - card_width) / 2, 400))
+            rotated_rect = card_image.get_rect(center=((width - card_width) / 2 + x[2], 400 + x[3]))
             screen.blit(card_image, rotated_rect.topleft)
 
         for i in range(len(game.current_deck) if len(game.current_deck) <= 5 else 5):  
@@ -110,6 +116,8 @@ def redraw(n, game):
         screen.blit(text, (width/2 - text.get_width()/2, 0))
 
 def main():
+    global increase, current_hovering
+    
     mainLoop = True
     clock = pygame.time.Clock()
     try:
@@ -121,6 +129,8 @@ def main():
         mainLoop = False
         pygame.quit()
 
+    first_time = True
+
     while mainLoop:
         try:
             game = n.send("get")
@@ -129,18 +139,74 @@ def main():
             print("Connection Interrupted\nReturning To Menu\n")
             break
         
+        if first_time:
+            first_time = False
+            increase = [0] * len(game.player_hands[f"player{n.p}"])
+            print(increase)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 mainLoop = False
                 pygame.quit()
+            if game.ready:
+                
+                clicked = None
+                if event.type == pygame.MOUSEBUTTONDOWN and game.current_player == n.p:
+                    for index, rect, mask in current_rects:
+                        local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
+                        if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
+                            clicked = index
 
-            if event.type == pygame.MOUSEBUTTONDOWN and game.current_player == n.p:
-                for x in list(current_rects.items()):
-                    if x[1].collidepoint(event.pos) and game.player_hands[f"player{n.p}"][x[0]] in game.valid_cards:
-                        game = n.send(game.player_hands[f"player{n.p}"][x[0]])
+                        if draw_rect.collidepoint(event.pos):
+                            clicked = "Draw"
 
-                if draw_rect.collidepoint(event.pos):
-                    game = n.send("draw")
+                if clicked != None:
+                    if clicked == "Draw":
+                        game = n.send("draw")
+                        increase.append(0)
+                    else:
+                        if game.player_hands[f"player{n.p}"][clicked] in game.valid_cards:
+                            game = n.send(game.player_hands[f"player{n.p}"][clicked])
+                            del increase[clicked]
+
+                
+                current_hovering = None
+                
+                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                hovering = None
+                if event.type == pygame.MOUSEMOTION and game.current_player == n.p:
+                    for index, rect, mask in current_rects:
+                        local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
+                        if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
+                            hovering = index
+
+                        if draw_rect.collidepoint(event.pos):
+                            hovering = "Draw"
+
+                if hovering != None:
+                    if hovering == "Draw":
+                        pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+                    else:
+                        if game.player_hands[f"player{n.p}"][hovering] in game.valid_cards:
+                            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
+                            current_hovering = hovering
+                        else:
+                            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+                    
+                else:
+                    pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+
+        
+        
+
+        if current_hovering != None:
+            increase[current_hovering] += 1
+        for i, x in enumerate(increase):
+            if x != 0:
+                if i != current_hovering:
+                    increase[i] -= 1
+                    
+        print(increase)
                 
 
         redraw(n, game)
@@ -171,3 +237,6 @@ def menu_screen():
 
 while True:
     menu_screen()
+
+
+#python client.py
