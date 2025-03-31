@@ -44,6 +44,9 @@ def threaded_client(conn, p, gameId):
                     elif data != "get":
                         game.play(data)
 
+                    if game.ready:
+                        game.update_time()
+
                     reply = game
                     conn.sendall(pickle.dumps(reply))
             else:
@@ -69,7 +72,7 @@ while True:
     p = 0
     gameId = (idCount-1) // 4
     if idCount % 4 == 1:
-        games[gameId] = Game() #Instance of game
+        games[gameId] = Game()
         print(f"Creating game {gameId}")
     else:
         p = (idCount - 1) % 4

@@ -1,4 +1,5 @@
 import random
+import time
 
 class Game:
     def __init__ (self):
@@ -34,6 +35,8 @@ class Game:
                 card = random.randrange(0, len(self.current_deck))
                 self.player_hands[f"player{y+1}"].append(self.current_deck[card])
                 del self.current_deck[card]
+
+        self.start_time = time.time()
  
     def play(self, card):
         self.current_card = card
@@ -94,3 +97,16 @@ class Game:
 
     def refresh(self):
         self.current_deck = self.base_deck.copy()
+
+    def update_time(self):
+        print(time.time()- self.start_time)
+        if time.time()- self.start_time >= 30:
+            self.start_time = time.time()
+
+            card = random.randrange(0, len(self.current_deck))
+            self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
+            del self.current_deck[card]
+            self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+
+            if self.current_player == 0:
+                self.current_player = (1 if self.clockwise else 4)

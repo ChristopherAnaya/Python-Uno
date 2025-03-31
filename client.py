@@ -19,7 +19,7 @@ screen = pygame.display.set_mode((width, height))
 
 cards_sprites = sprites()
 
-back_card_image = pygame.transform.scale(cards_sprites["back"], (card_width, card_height))
+back_card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
 
 current_hovering = None
 
@@ -27,7 +27,6 @@ def player_hands(game, n):
     global current_rects
     current_rects = []
 
-    counter = 0
     num = len(game.player_hands[f"player{n.p}"])
 
     start_x = (width - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
@@ -40,50 +39,86 @@ def player_hands(game, n):
     for i, card in enumerate(game.player_hands[f"player{n.p}"]):
         
         card_image = pygame.transform.scale(cards_sprites[card], (card_width * 1.5, card_height * 1.5))
-        rotated_image = pygame.transform.rotate(card_image, rotations[counter])
+        rotated_image = pygame.transform.rotate(card_image, rotations[i])
         
-        
-        rect = rotated_image.get_rect(topleft=(start_x + counter * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5), 
-                                               600 + abs(rotations[counter])))
+        rect = rotated_image.get_rect(topleft=(start_x + i * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5), 
+                                               600 + abs(rotations[i]) - increase[i]))
         screen.blit(rotated_image, rect.topleft)
 
         
         mask = pygame.mask.from_surface(rotated_image)
         current_rects.append((i, rect, mask))
-        counter += 1
 
-"""    draw_p = (n.p + 1) % 5
+    draw_p = (n.p + 1) % 5
     if draw_p == 0:
         draw_p = 1
-    start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
-    counter = 0
-    for card in game.player_hands[f"player{draw_p}"]:
-        rotated_image = pygame.transform.rotate(cards_sprites["back"], 90)
-        rect = rotated_image.get_rect(topleft=(card_width * 2, start_y + (card_width + 10) * counter))
+
+    num = len(game.player_hands[f"player{draw_p}"])
+
+    start_y = (height - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
+
+    if num % 2 == 0:
+        rotations = ([i for i in range(-num // 2, 0)] + [i for i in range(1, num // 2 + 1)])[::-1]
+    else:
+        rotations = [i for i in range(-num // 2 + 1, num // 2 + 1)][::-1]
+
+
+    for i, card in enumerate(game.player_hands[f"player{draw_p}"]):
+        
+        card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
+        rotated_image = pygame.transform.rotate(card_image, 180)
+        rotated_image = pygame.transform.rotate(rotated_image, rotations[i] + 90)
+        
+        rect = rotated_image.get_rect(topleft=(card_height * .5 - abs(rotations[i]), start_y + i * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5)))
         screen.blit(rotated_image, rect.topleft)
-        counter += 1
+
+    draw_p = (draw_p+ 1) % 5
+    if draw_p == 0:
+        draw_p = 1
+
+    num = len(game.player_hands[f"player{draw_p}"])
+
+    start_x = (width - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
+
+    if num % 2 == 0:
+        rotations = ([i for i in range(-num // 2, 0)] + [i for i in range(1, num // 2 + 1)])[::-1]
+    else:
+        rotations = [i for i in range(-num // 2 + 1, num // 2 + 1)][::-1]
+
+    for i, card in enumerate(game.player_hands[f"player{draw_p}"]):
+        
+        card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
+        rotated_image = pygame.transform.rotate(card_image, 180)
+        rotated_image = pygame.transform.rotate(rotated_image, - rotations[i])
+        
+        rect = rotated_image.get_rect(topleft=(start_x + i * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5), 
+                                               100 - abs(rotations[i])))
+        screen.blit(rotated_image, rect.topleft)
+
+
+
 
     draw_p = (draw_p + 1) % 5
     if draw_p == 0:
         draw_p = 1
-    start_x = (width - (len(game.player_hands[f"player{n.p}"]) * card_width + (len(game.player_hands[f"player{n.p}"]) - 1) * 10)) / 2
-    counter = 0
-    for card in game.player_hands[f"player{draw_p}"]:
-        rotated_image = pygame.transform.rotate(cards_sprites["back"], 180)
-        rect = rotated_image.get_rect(topleft=(start_x + counter * (card_width + 10), 100))
+
+    num = len(game.player_hands[f"player{draw_p}"])
+
+    start_y = (height - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
+
+    if num % 2 == 0:
+        rotations = ([i for i in range(-num // 2, 0)] + [i for i in range(1, num // 2 + 1)])[::-1]
+    else:
+        rotations = [i for i in range(-num // 2 + 1, num // 2 + 1)][::-1]
+
+
+    for i, card in enumerate(game.player_hands[f"player{draw_p}"]):
+        
+        card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.5, card_height * 1.5))
+        rotated_image = pygame.transform.rotate(card_image, -rotations[i] + 90)
+        
+        rect = rotated_image.get_rect(topleft=(width - card_height * 1.5 - card_height * .5 + abs(rotations[i]), start_y + i * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5)))
         screen.blit(rotated_image, rect.topleft)
-        counter += 1
-    
-    draw_p = (draw_p + 1) % 5
-    if draw_p == 0:
-        draw_p = 1
-    start_y = (height - (len(game.player_hands[f"player{draw_p}"]) * card_width + (len(game.player_hands[f"player{draw_p}"]) - 1) * 10)) / 2
-    counter = 0
-    for card in game.player_hands[f"player{draw_p}"]:
-        rotated_image = pygame.transform.rotate(cards_sprites["back"], 270)
-        rect = rotated_image.get_rect(topleft=(width - card_width * 2 - card_height, start_y + (card_width + 10) * counter))
-        screen.blit(rotated_image, rect.topleft)
-        counter += 1"""
 
 
 def redraw(n, game):
@@ -101,15 +136,14 @@ def redraw(n, game):
         player_hands(game, n)
 
         for x in game.played_cards:
-            card_image = pygame.transform.rotate(cards_sprites[x[0]], x[1])
+            card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
+            card_image = pygame.transform.rotate(card_image, x[1])
             rotated_rect = card_image.get_rect(center=((width - card_width) / 2 + x[2], 400 + x[3]))
             screen.blit(card_image, rotated_rect.topleft)
 
-        for i in range(len(game.current_deck) if len(game.current_deck) <= 5 else 5):  
-            offset = i * 2 
-            screen.blit(back_card_image, ((width - card_width) / 2 * 1.5 - offset, 400 - offset)) 
+        screen.blit(back_card_image, ((width - card_width * 1.5) / 2 * 1.2 , 325)) 
 
-        draw_rect = cards_sprites["back"].get_rect(topleft=((width - card_width) / 2 * 1.5 - offset, 400 - offset))
+        draw_rect = back_card_image.get_rect(topleft=((width - card_width * 1.5) / 2 * 1.2 , 325))
 
         font = pygame.font.SysFont("comicsans", 40)
         text = font.render(f"It Is Players {game.current_player} Turn And You Are {n.p}", 1, (0,0,0))
@@ -142,7 +176,6 @@ def main():
         if first_time:
             first_time = False
             increase = [0] * len(game.player_hands[f"player{n.p}"])
-            print(increase)
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -197,16 +230,17 @@ def main():
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
 
         
-        
+        if len(increase) != len(game.player_hands[f"player{n.p}"]):
+            for x in range(len(game.player_hands[f"player{n.p}"]) - len(increase)):
+                increase.append(0)
 
         if current_hovering != None:
-            increase[current_hovering] += 1
+            if increase[current_hovering] < 50:
+                increase[current_hovering] += 5
         for i, x in enumerate(increase):
             if x != 0:
                 if i != current_hovering:
-                    increase[i] -= 1
-                    
-        print(increase)
+                    increase[i] -= 5
                 
 
         redraw(n, game)
