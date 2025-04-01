@@ -26,7 +26,7 @@ class Game:
        
         self.current_player = 1
         self.clockwise = True
-
+    
         self.player_hands = {}
         for x in range(4):
             self.player_hands[f"player{x+1}"] = []
@@ -36,8 +36,30 @@ class Game:
                 self.player_hands[f"player{y+1}"].append(self.current_deck[card])
                 del self.current_deck[card]
 
-        self.start_time = time.time()
+        self.first = True
+        self.time_left = 30.00
+
+        for x in range(4):
+            self.player_hands[f"player{x+1}"] = sorted(self.player_hands[f"player{x+1}"])
  
+    def sort(self):
+        def card_key(card):
+            parts = card.split("_", 1)  
+            color = parts[0]
+            rest = parts[1] if len(parts) > 1 else ""
+
+            number_value = int(rest) if rest.isdigit() else float("inf")
+
+            return (color, number_value)
+        
+        for x in range(4):
+            self.player_hands[f"player{x+1}"] = sorted(self.player_hands[f"player{x+1}"], key=card_key)
+
+        print(self.player_hands)
+
+    def time(self):
+        self.start_time = time.time()
+
     def play(self, card):
         self.current_card = card
         self.played_cards.append([card, random.randint(-90, 90), random.randint(-10, 10), random.randint(-10, 10)])
@@ -85,6 +107,9 @@ class Game:
             self.current_player = (1 if self.clockwise else 4)
 
         print(self.current_player)
+
+        self.sort()
+        self.time()
     
     def draw(self):
         card = random.randrange(0, len(self.current_deck))
@@ -94,14 +119,16 @@ class Game:
 
         if self.current_player == 0:
             self.current_player = (1 if self.clockwise else 4)
-
-    def refresh(self):
-        self.current_deck = self.base_deck.copy()
+        
+        self.sort()
+        self.time()
 
     def update_time(self):
-        print(time.time()- self.start_time)
-        if time.time()- self.start_time >= 30:
-            self.start_time = time.time()
+        if self.first:
+            self.first = False
+            self.time()
+        self.time_left = round(time.time()- self.start_time, 2)
+        if self.time_left >= 30:
 
             card = random.randrange(0, len(self.current_deck))
             self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
@@ -110,3 +137,6 @@ class Game:
 
             if self.current_player == 0:
                 self.current_player = (1 if self.clockwise else 4)
+
+            self.sort()
+            self.time()
