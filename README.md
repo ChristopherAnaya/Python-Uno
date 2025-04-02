@@ -63,8 +63,8 @@ To Join A Python Uno Server Follow These Steps.
 6. Launch The client.py File. If You Did Everything Right And You're The First, Second, Or Third Player You'll See This Screen And Something Like This In The Terminal.
 
 ![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20092155.png?raw=true) 
-![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20092426.png?raw=true) 
+![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20093643.png?raw=true) 
 
 7. If You're Player Four The Game Will Launch And You Will See Something Like This
 
-![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20093643.png?raw=true)
+![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20092426.png?raw=true)

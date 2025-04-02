@@ -4,6 +4,9 @@ from game import Game
 import pickle
 import os
 
+
+#ngrok tcp 5555
+
 os.system("cls")
 
 server = "192.168.211.40"
