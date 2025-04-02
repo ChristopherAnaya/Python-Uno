@@ -4,6 +4,7 @@ import pygame
 import os
 
 
+#cd C:\Users\CAnay353\Documents\Python-Uno\Python-Uno
 #python client.py
 
 
@@ -257,5 +258,5 @@ while True:
     else:
         main()
 
-        
+#cd C:\Users\CAnay353\Documents\Python-Uno\Python-Uno
 #python client.py
