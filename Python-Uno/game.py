@@ -108,7 +108,7 @@ class Game:
 
         print(self.current_player)
 
-        self.sort()
+        #self.sort()
         self.time()
     
     def draw(self):
@@ -120,7 +120,7 @@ class Game:
         if self.current_player == 0:
             self.current_player = (1 if self.clockwise else 4)
         
-        self.sort()
+        #self.sort()
         self.time()
 
     def update_time(self):
@@ -138,5 +138,5 @@ class Game:
             if self.current_player == 0:
                 self.current_player = (1 if self.clockwise else 4)
 
-            self.sort()
+            #self.sort()
             self.time()

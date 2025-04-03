@@ -24,29 +24,47 @@ back_card_image = pygame.transform.scale(cards_sprites["back"], (card_width * 1.
 
 current_hovering = None
 
+drawing = False
+draw_frame = 0
+draw_cords = [0,0]
+
 def player_hands(game, n):
-    global current_rects
+    global current_rects, draw_frame, draw_cords, drawing
     current_rects = []
-
     num = len(game.player_hands[f"player{n.p}"])
-
     start_x = (width - (num * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5))) / 2
 
-    for i, card in enumerate(game.player_hands[f"player{n.p}"]):
+    
+    hand = game.player_hands[f"player{n.p}"]
+    if drawing:
+        draw_image = pygame.transform.scale(cards_sprites[hand[-1]], (card_width * 1.5, card_height * 1.5))
+        draw_image.fill((100, 100, 100), special_flags=pygame.BLEND_RGB_MULT)
+        draw_cords = [int(((start_x + (num-1) * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5)) - ((width - card_width * 1.5) / 2 * 1.2 )) / 60 * draw_frame), int( 275 / 60 * draw_frame)]
+        del hand[-1]
+        draw_frame += 3
+    
+
+    for i, card in enumerate(hand):
         
         card_image = pygame.transform.scale(cards_sprites[card], (card_width * 1.5, card_height * 1.5))
         
         if n.p != game.current_player:
             card_image.fill((100, 100, 100), special_flags=pygame.BLEND_RGB_MULT)
-        
         rect = card_image.get_rect(topleft=(start_x + i * (card_width - ((num // 2 - (1 if num // 2 != 0 else 0))) * 5), 
                                                600 - increase[i]))
         
         screen.blit(card_image, rect.topleft)
 
-        
         mask = pygame.mask.from_surface(card_image)
         current_rects.append((i, rect, mask))
+
+    if drawing:
+        screen.blit(draw_image, ((width - card_width * 1.5) / 2 * 1.2 + draw_cords[0], 325 + draw_cords[1])) 
+
+        if draw_frame == 60:
+                drawing = False
+                draw_frame = 0
+                draw_cords = [0,0]
 
     draw_p = (n.p + 1) % 5
     if draw_p == 0:
@@ -81,9 +99,6 @@ def player_hands(game, n):
                                                100))
         screen.blit(rotated_image, rect.topleft)
 
-
-
-
     draw_p = (draw_p + 1) % 5
     if draw_p == 0:
         draw_p = 1
@@ -112,8 +127,6 @@ def redraw(n, game):
     else:
         global draw_rect
 
-        player_hands(game, n)
-
         for x in game.played_cards:
             card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
             card_image = pygame.transform.rotate(card_image, x[1])
@@ -130,8 +143,10 @@ def redraw(n, game):
         second_text = font.render(f"Seconds left:{round(30.00 - game.time_left, 2)}", 1, (0,0,0))
         screen.blit(second_text, (width/2 - first_text.get_width()/2 + first_text.get_width(), 0))
 
+        player_hands(game, n)
+
 def main():
-    global increase, current_hovering
+    global increase, current_hovering, drawing
     
     mainLoop = True
     clock = pygame.time.Clock()
@@ -173,6 +188,7 @@ def main():
 
                         if draw_rect.collidepoint(event.pos):
                             clicked = "Draw"
+                            drawing = True
 
                 if clicked != None:
                     if clicked == "Draw":
@@ -225,7 +241,6 @@ def main():
                 
 
         redraw(n, game)
-        
         clock.tick(60)
         pygame.display.update()
         
@@ -250,7 +265,7 @@ def menu_screen():
                 run = False
     main() 
 
-switch = "te"
+switch = "t"
 
 while True:
     if switch == "t":
