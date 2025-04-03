@@ -55,11 +55,14 @@ To Join A Python Uno Server Follow These Steps.
 
 ![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20091202.png?raw=true)  
 
-4. Ask The Server Hoster For Their Server Number Located In The server.py File.
+4. Navigate To Your Control Prompt (Shown In The Install Section) And Type "ipcofig" And Hit Enter.
 
-![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20085935.png?raw=true)  
+![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20090416.png?raw=true)   
 
 5. Copy This Number Into The Section Identified In Step Three.
+
+![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20090534.png?raw=true)  
+
 6. Launch The client.py File. If You Did Everything Right And You're The First, Second, Or Third Player You'll See This Screen And Something Like This In The Terminal.
 
 ![image](https://github.com/ChristopherAnaya/Ignore/blob/main/Read-Me-Image/Screenshot%202025-04-02%20092155.png?raw=true) 
