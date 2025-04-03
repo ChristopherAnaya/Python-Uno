@@ -4,7 +4,7 @@ card_height = 100
 card_width = 60
 
 def load_sprite(x, y):
-    cards_sheet = pygame.image.load(r"cards_spritesheet.png").convert_alpha()
+    cards_sheet = pygame.image.load(r"art/cards_spritesheet.png").convert_alpha()
     sprite = pygame.Surface((60, 100), pygame.SRCALPHA)  
     sprite.blit(cards_sheet, (0, 0), (x, y, card_width, card_height)) 
     return sprite

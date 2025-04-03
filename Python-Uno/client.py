@@ -125,7 +125,7 @@ def redraw(n, game):
         screen.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
 
     else:
-        global draw_rect
+        global draw_rect, settings_rect
 
         for x in game.played_cards:
             card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
@@ -136,6 +136,11 @@ def redraw(n, game):
         screen.blit(back_card_image, ((width - card_width * 1.5) / 2 * 1.2 , 325)) 
 
         draw_rect = back_card_image.get_rect(topleft=((width - card_width * 1.5) / 2 * 1.2 , 325))
+
+        settings_image = pygame.image.load(r"art\settings_logo.jpg")
+        settings_image = pygame.transform.scale(settings_image, (80, 80))
+        screen.blit(settings_image, (0, height-80)) 
+        settings_rect = back_card_image.get_rect(topleft=(0, height-80))
 
         font = pygame.font.SysFont("comicsans", 40)
         first_text = font.render(f"It Is Players {game.current_player} Turn And You Are {n.p}", 1, (0,0,0))
@@ -180,11 +185,15 @@ def main():
             if game.ready:
                 
                 clicked = None
-                if event.type == pygame.MOUSEBUTTONDOWN and game.current_player == n.p:
-                    for index, rect, mask in current_rects:
-                        local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
-                        if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
-                            clicked = index
+                if event.type == pygame.MOUSEBUTTONDOWN:
+                    if settings_rect.collidepoint(event.pos):
+                        print("why u reading this in the first place?")
+                    
+                    if game.current_player == n.p:
+                        for index, rect, mask in current_rects:
+                            local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
+                            if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
+                                clicked = index
 
                         if draw_rect.collidepoint(event.pos):
                             clicked = "Draw"
