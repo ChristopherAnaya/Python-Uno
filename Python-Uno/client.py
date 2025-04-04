@@ -2,9 +2,9 @@ from network import Network
 from sprites import *
 import pygame
 import os
+import time
 
 
-#cd C:\Users\CAnay353\Documents\Python-Uno\Python-Uno
 #python client.py
 
 
@@ -116,39 +116,43 @@ def player_hands(game, n):
 
 
 def redraw(n, game):
-    
-    screen.fill((128,128,128))
-
-    if not(game.ready):
+    print([len(x) for x in list(game.player_hands.values())])
+    if 0 in [len(x) for x in list(game.player_hands.values())]:
         font = pygame.font.SysFont("comicsans", 60)
-        text = font.render("Waiting For More Players...", 1, (255,0,0))
-        screen.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
-
+        text = font.render(f"You Win!", 1, (0,0,0)) if [len(x) for x in list(game.player_hands.values())][n.p-1] == 0 else font.render(f"Player {[len(x) for x in list(game.player_hands.values())].index(0) + 1} Wins.", 1, (0,0,0))
+        pygame.draw.rect(screen, (100, 100, 100), ((width - text.get_width()) // 2 - 20, (height - text.get_height()) // 2 - 20, text.get_width() + 40, text.get_height() + 40))
+        screen.blit(text, ((width - text.get_width()) // 2, (height - text.get_height()) // 2))
+        pygame.display.update()
+        time.sleep(5)
+        pygame.quit()
+    
     else:
-        global draw_rect, settings_rect
+        screen.fill((128,128,128))
+        if not(game.ready):
+            font = pygame.font.SysFont("comicsans", 60)
+            text = font.render("Waiting For More Players...", 1, (255,0,0))
+            screen.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
 
-        for x in game.played_cards:
-            card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
-            card_image = pygame.transform.rotate(card_image, x[1])
-            rotated_rect = card_image.get_rect(center=((width - card_width) / 2 + x[2], 400 + x[3]))
-            screen.blit(card_image, rotated_rect.topleft)
+        else:
+            global draw_rect, settings_rect
 
-        screen.blit(back_card_image, ((width - card_width * 1.5) / 2 * 1.2 , 325)) 
+            for x in game.played_cards:
+                card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
+                card_image = pygame.transform.rotate(card_image, x[1])
+                rotated_rect = card_image.get_rect(center=((width - card_width) / 2 + x[2], 400 + x[3]))
+                screen.blit(card_image, rotated_rect.topleft)
 
-        draw_rect = back_card_image.get_rect(topleft=((width - card_width * 1.5) / 2 * 1.2 , 325))
+            screen.blit(back_card_image, ((width - card_width * 1.5) / 2 * 1.2 , 325)) 
 
-        settings_image = pygame.image.load(r"art\settings_logo.jpg")
-        settings_image = pygame.transform.scale(settings_image, (80, 80))
-        screen.blit(settings_image, (0, height-80)) 
-        settings_rect = back_card_image.get_rect(topleft=(0, height-80))
+            draw_rect = back_card_image.get_rect(topleft=((width - card_width * 1.5) / 2 * 1.2 , 325))
 
-        font = pygame.font.SysFont("comicsans", 40)
-        first_text = font.render(f"It Is Players {game.current_player} Turn And You Are {n.p}", 1, (0,0,0))
-        screen.blit(first_text, (width/2 - first_text.get_width()/1.5, 0))
-        second_text = font.render(f"Seconds left:{round(30.00 - game.time_left, 2)}", 1, (0,0,0))
-        screen.blit(second_text, (width/2 - first_text.get_width()/2 + first_text.get_width(), 0))
+            font = pygame.font.SysFont("comicsans", 40)
+            first_text = font.render(f"It Is Players {game.current_player} Turn And You Are {n.p}", 1, (0,0,0))
+            screen.blit(first_text, (width/2 - first_text.get_width()/1.5, 0))
+            second_text = font.render(f"Seconds left:{round(30.00 - game.time_left, 2)}", 1, (0,0,0))
+            screen.blit(second_text, (width/2 - first_text.get_width()/2 + first_text.get_width(), 0))
 
-        player_hands(game, n)
+            player_hands(game, n)
 
 def main():
     global increase, current_hovering, drawing
@@ -183,12 +187,8 @@ def main():
                 mainLoop = False
                 pygame.quit()
             if game.ready:
-                
                 clicked = None
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if settings_rect.collidepoint(event.pos):
-                        print("why u reading this in the first place?")
-                    
                     if game.current_player == n.p:
                         for index, rect, mask in current_rects:
                             local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
@@ -252,35 +252,12 @@ def main():
         redraw(n, game)
         clock.tick(60)
         pygame.display.update()
-        
 
-def menu_screen():
-    run = True
-    clock = pygame.time.Clock()
-
-    while run:
-        clock.tick(60)
-        screen.fill((128,128,128))
-        font = pygame.font.SysFont("comicsans", 60)
-        text = font.render("Click to play", 1, (0,0,0))
-        screen.blit(text, (width / 2 - text.get_width()/2, height / 2 - text.get_height()/2))
-        pygame.display.update()
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                run = False
-                pygame.quit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                run = False
-    main() 
-
-switch = "t"
+switch = "te"
 
 while True:
     if switch == "t":
-        menu_screen()
+        import menu
     else:
         main()
-
-#cd C:\Users\CAnay353\Documents\Python-Uno\Python-Uno
 #python client.py

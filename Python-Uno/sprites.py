@@ -8,6 +8,9 @@ def load_sprite(x, y):
     sprite = pygame.Surface((60, 100), pygame.SRCALPHA)  
     sprite.blit(cards_sheet, (0, 0), (x, y, card_width, card_height)) 
     return sprite
+
+def load_image(filename):
+    return pygame.image.load(rf"art\{filename}").convert_alpha()
     
 def sprites():
 
