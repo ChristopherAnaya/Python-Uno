@@ -38,9 +38,12 @@ class Game:
 
         self.first = True
         self.time_left = 30.00
+        self.pause = False
 
         for x in range(4):
             self.player_hands[f"player{x+1}"] = sorted(self.player_hands[f"player{x+1}"])
+
+        self.update_player = self.current_player
  
     def sort(self):
         def card_key(card):
@@ -55,81 +58,58 @@ class Game:
         for x in range(4):
             self.player_hands[f"player{x+1}"] = sorted(self.player_hands[f"player{x+1}"], key=card_key)
 
-        print(self.player_hands)
-
     def time(self):
         self.start_time = time.time()
 
     def play(self, card):
         self.current_card = card
         self.played_cards.append([card, random.randint(-90, 90), random.randint(-10, 10), random.randint(-10, 10)])
-        if len(self.played_cards) > 10:
-            del self.played_cards[0]
-
-        del self.player_hands[f"player{self.current_player}"][self.player_hands[f"player{self.current_player}"].index(card)]
-        
         if "wild" in self.current_card:
-            self.valid_cards = self.base_deck
+            self.pause = True
+
+            self.update_player = (self.update_player + (1 if self.clockwise else - 1)) % 5
+            if self.update_player == 0:
+                self.update_player = (1 if self.clockwise else 4)
+            if len(self.played_cards) > 10:
+                del self.played_cards[0]
+
+            del self.player_hands[f"player{self.current_player}"][self.player_hands[f"player{self.current_player}"].index(card)]
         else:
+            self.current_player = self.update_player
+            if len(self.played_cards) > 10:
+                del self.played_cards[0]
+            del self.player_hands[f"player{self.current_player}"][self.player_hands[f"player{self.current_player}"].index(card)]
             self.valid_cards = list(filter(lambda x: x.split("_")[0] == self.current_card.split("_")[0] or x.split("_")[1] == self.current_card.split("_")[1], self.base_deck)) + ['wild_change', 'wild_plus4']
+            
+            if self.current_card.split("_")[1] == "reverse":
+                self.clockwise = not self.clockwise
         
-        
-        if self.current_card.split("_")[1] == "reverse":
-            self.clockwise = not self.clockwise
-       
-        if self.current_card.split("_")[1] == "plus2":
-            self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+            if self.current_card.split("_")[1] == "plus2":
+                self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+                if self.current_player == 0:
+                    self.current_player = (1 if self.clockwise else 4)
+                for x in range(2):
+                    card = random.randrange(0, len(self.current_deck))
+                    self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
+                    del self.current_deck[card]
+
+            if self.current_card.split("_")[1] == "block":
+                self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+
             if self.current_player == 0:
                 self.current_player = (1 if self.clockwise else 4)
-            for x in range(2):
-                card = random.randrange(0, len(self.current_deck))
-                self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
-                del self.current_deck[card]
 
-        if self.current_card.split("_")[1] == "plus4":
             self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+
             if self.current_player == 0:
                 self.current_player = (1 if self.clockwise else 4)
-            for x in range(4):
-                card = random.randrange(0, len(self.current_deck))
-                self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
-                del self.current_deck[card]
-
-        if self.current_card.split("_")[1] == "block":
-            self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
-
-        if self.current_player == 0:
-            self.current_player = (1 if self.clockwise else 4)
-
-        self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
-
-        if self.current_player == 0:
-            self.current_player = (1 if self.clockwise else 4)
-
-        print(self.current_player)
-
-        #self.sort()
-        self.time()
+            
+            self.update_player = self.current_player
+            #self.sort()
+            self.time()
     
     def draw(self):
-        card = random.randrange(0, len(self.current_deck))
-        self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
-        del self.current_deck[card]
-        self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
-
-        if self.current_player == 0:
-            self.current_player = (1 if self.clockwise else 4)
-        
-        #self.sort()
-        self.time()
-
-    def update_time(self):
-        if self.first:
-            self.first = False
-            self.time()
-        self.time_left = round(time.time()- self.start_time, 2)
-        if self.time_left >= 30:
-
+        if not self.pause:
             card = random.randrange(0, len(self.current_deck))
             self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
             del self.current_deck[card]
@@ -137,6 +117,45 @@ class Game:
 
             if self.current_player == 0:
                 self.current_player = (1 if self.clockwise else 4)
-
+            
+            self.update_player = self.current_player
             #self.sort()
             self.time()
+
+    def update_time(self):
+        if not self.pause:
+            if self.first:
+                self.first = False
+                self.time()
+            self.time_left = round(time.time()- self.start_time, 2)
+            if self.time_left >= 30:
+
+                card = random.randrange(0, len(self.current_deck))
+                self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
+                del self.current_deck[card]
+                self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+
+                if self.current_player == 0:
+                    self.current_player = (1 if self.clockwise else 4)
+
+                #self.sort() play outer wilds
+                self.time()
+
+    def wild_update(self, color):
+        self.valid_cards = list(filter(lambda x: x.split("_")[0] == color, self.base_deck)) + ['wild_change', 'wild_plus4']
+        self.current_player = self.update_player
+        print(self.current_card)
+        
+        if self.current_card.split("_")[1] == "plus4":
+            for x in range(4):
+                card = random.randrange(0, len(self.current_deck))
+                self.player_hands[f"player{self.current_player}"].append(self.current_deck[card])
+                del self.current_deck[card]
+            self.current_player = (self.current_player + (1 if self.clockwise else - 1)) % 5
+            if self.current_player == 0:
+                self.current_player = (1 if self.clockwise else 4)
+
+        self.pause = False
+
+        self.time()
+        

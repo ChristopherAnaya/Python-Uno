@@ -27,6 +27,7 @@ current_hovering = None
 drawing = False
 draw_frame = 0
 draw_cords = [0,0]
+masks = []
 
 def player_hands(game, n):
     global current_rects, draw_frame, draw_cords, drawing
@@ -116,7 +117,6 @@ def player_hands(game, n):
 
 
 def redraw(n, game):
-    print([len(x) for x in list(game.player_hands.values())])
     if 0 in [len(x) for x in list(game.player_hands.values())]:
         font = pygame.font.SysFont("comicsans", 60)
         text = font.render(f"You Win!", 1, (0,0,0)) if [len(x) for x in list(game.player_hands.values())][n.p-1] == 0 else font.render(f"Player {[len(x) for x in list(game.player_hands.values())].index(0) + 1} Wins.", 1, (0,0,0))
@@ -134,7 +134,7 @@ def redraw(n, game):
             screen.blit(text, (width/2 - text.get_width()/2, height/2 - text.get_height()/2))
 
         else:
-            global draw_rect, settings_rect
+            global draw_rect, masks
 
             for x in game.played_cards:
                 card_image = pygame.transform.scale(cards_sprites[x[0]], (card_width * 1.5, card_height * 1.5))
@@ -154,8 +154,52 @@ def redraw(n, game):
 
             player_hands(game, n)
 
+            if game.pause:
+                rect = pygame.Surface((150, 150), pygame.SRCALPHA)
+                rect.fill((100, 100, 100))
+                rect = pygame.transform.rotate(rect, 45)
+                pos = rect.get_rect(center=(width//2, height//2))
+                screen.blit(rect, pos.topleft)
+
+
+
+                
+                masks = []
+                blue_rect = pygame.Surface((50, 50), pygame.SRCALPHA)
+                blue_rect.fill((0,0,255))
+                blue_rect = pygame.transform.rotate(blue_rect, 45)
+                blue_pos = blue_rect.get_rect(center=(width//2, height//2 - 50))
+                screen.blit(blue_rect, blue_pos.topleft)
+
+                red_rect = pygame.Surface((50, 50), pygame.SRCALPHA)
+                red_rect.fill((255, 0, 0))
+                red_rect = pygame.transform.rotate(red_rect, 45)
+                red_pos = red_rect.get_rect(center=(width//2 + 50, height//2))
+                screen.blit(red_rect, red_pos.topleft)
+
+                green_rect = pygame.Surface((50, 50), pygame.SRCALPHA)
+                green_rect.fill((0, 255, 0))
+                green_rect = pygame.transform.rotate(green_rect, 45)
+                green_pos = green_rect.get_rect(center=(width//2 - 50, height//2))
+                screen.blit(green_rect, green_pos.topleft)
+
+                yellow_rect = pygame.Surface((50, 50), pygame.SRCALPHA)
+                yellow_rect.fill((255, 255, 0))
+                yellow_rect = pygame.transform.rotate(yellow_rect, 45)
+                yellow_pos = yellow_rect.get_rect(center=(width//2, height//2 + 50))
+                screen.blit(yellow_rect, yellow_pos.topleft)
+
+                mask = pygame.mask.from_surface(blue_rect)
+                masks.append([blue_pos, mask])
+                mask = pygame.mask.from_surface(red_rect)
+                masks.append([red_pos, mask])
+                mask = pygame.mask.from_surface(green_rect)
+                masks.append([green_pos, mask])
+                mask = pygame.mask.from_surface(yellow_rect)
+                masks.append([yellow_pos, mask])
+
 def main():
-    global increase, current_hovering, drawing
+    global increase, current_hovering, drawing, masks
     
     mainLoop = True
     clock = pygame.time.Clock()
@@ -199,7 +243,13 @@ def main():
                             clicked = "Draw"
                             drawing = True
 
-                if clicked != None:
+                        if game.pause:
+                            for i, (rect, mask) in enumerate(masks):
+                                local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
+                                if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
+                                    game = n.send(["blue", "red", "green", "yellow"][i])
+
+                if clicked != None and not game.pause:
                     if clicked == "Draw":
                         game = n.send("draw")
                         increase.append(0)
@@ -214,10 +264,11 @@ def main():
                 pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
                 hovering = None
                 if event.type == pygame.MOUSEMOTION and game.current_player == n.p:
-                    for index, rect, mask in current_rects:
-                        local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
-                        if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
-                            hovering = index
+                    if not game.pause:
+                        for index, rect, mask in current_rects:
+                            local_mouse_pos = (event.pos[0] - rect.left, event.pos[1] - rect.top)
+                            if rect.collidepoint(event.pos) and mask.get_at(local_mouse_pos):
+                                hovering = index
 
                         if draw_rect.collidepoint(event.pos):
                             hovering = "Draw"

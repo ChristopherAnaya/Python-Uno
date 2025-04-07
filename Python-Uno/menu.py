@@ -17,7 +17,10 @@ while mainLoop:
             if event.type == pygame.QUIT:
                 mainLoop = False
                 pygame.quit()
-                
+
+    background_image = pygame.image.load(r"art\menu.jpg").convert_alpha()
+    background_image = pygame.transform.scale(background_image, (width, height))
+    screen.blit(background_image, (0,0))
     clock.tick(60)
     pygame.display.update()
 

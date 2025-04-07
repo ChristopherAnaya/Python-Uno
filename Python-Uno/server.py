@@ -44,6 +44,8 @@ def threaded_client(conn, p, gameId):
                     
                     if data == "draw":
                         game.draw()
+                    elif data in ["red", "green", "yellow", "blue"]:
+                        game.wild_update(data)
                     elif data != "get":
                         game.play(data)
 
